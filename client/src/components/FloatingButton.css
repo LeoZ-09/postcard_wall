@@ -1,0 +1,135 @@
+.fab-container {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.fab-main {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: var(--gray-900);
+  color: var(--white);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-lg);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fab-main:hover {
+  transform: scale(1.08);
+  box-shadow: var(--shadow-xl);
+}
+
+.fab-main:active {
+  transform: scale(0.95);
+}
+
+.fab-icon {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fab-container.open .fab-icon .icon-vertical {
+  transform: rotate(90deg);
+  transform-origin: center;
+}
+
+.fab-container.open .fab-icon {
+  transform: rotate(45deg);
+}
+
+.fab-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: -1;
+}
+
+.fab-container.open .fab-backdrop {
+  opacity: 1;
+  visibility: visible;
+}
+
+.fab-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transform: translateY(-10px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fab-container.open .fab-menu {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+}
+
+.fab-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background-color: var(--white);
+  border: none;
+  border-radius: 2rem;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--gray-700);
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-md);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.fab-item:hover {
+  background-color: var(--gray-100);
+  transform: translateX(-4px);
+  text-decoration: none;
+  color: var(--gray-900);
+}
+
+.fab-item svg {
+  flex-shrink: 0;
+}
+
+.fab-item span {
+  display: inline;
+}
+
+@media (max-width: 480px) {
+  .fab-container {
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .fab-main {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .fab-item span {
+    display: none;
+  }
+
+  .fab-item {
+    padding: 0.75rem;
+    border-radius: 50%;
+  }
+}
