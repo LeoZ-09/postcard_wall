@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>明信片墙 | Postcard Wall</title>
+  <link rel="stylesheet" href="/styles/main.css">
+</head>
+<body>
+  <div id="app">
+    <header class="header">
+      <div class="header-content">
+        <h1 class="logo">✉️ 明信片墙</h1>
+        <nav class="nav">
+          <button class="nav-btn active" data-page="wall">明信片墙</button>
+          <button class="nav-btn" data-page="manage">管理</button>
+          <button class="nav-btn" data-page="rules">规则设置</button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="main">
+      <section id="wall-page" class="page active">
+        <div class="wall-header">
+          <div class="stats">
+            <span class="stat-item">总计: <strong id="total-count">0</strong> 张</span>
+            <span class="stat-item">旅行中: <strong id="traveling-count">0</strong> 张</span>
+          </div>
+          <div class="filters">
+            <select id="platform-filter" class="filter-select">
+              <option value="">全部平台</option>
+            </select>
+          </div>
+        </div>
+        <div id="postcard-grid" class="postcard-grid"></div>
+        <div id="loading" class="loading hidden">
+          <div class="spinner"></div>
+        </div>
+        <div id="empty-state" class="empty-state hidden">
+          <p>还没有明信片，快来添加第一张吧！</p>
+        </div>
+      </section>
+
+      <section id="manage-page" class="page">
+        <div class="manage-header">
+          <h2 id="form-title">添加明信片</h2>
+        </div>
+        <form id="postcard-form" class="postcard-form">
+          <input type="hidden" id="edit-id">
+          <div class="form-row">
+            <div class="form-group">
+              <label>正面图片</label>
+              <div class="image-upload-area" id="front-upload-area">
+                <input type="file" id="front-input" accept="image/*" hidden>
+                <div class="upload-placeholder">
+                  <span class="upload-icon">📷</span>
+                  <span>点击上传或选择已有图片</span>
+                </div>
+                <div class="image-preview hidden">
+                  <img id="front-preview" src="" alt="正面预览">
+                  <button type="button" class="remove-btn" data-target="front">×</button>
+                </div>
+              </div>
+              <button type="button" class="btn btn-small" id="select-front-btn">从已有图片选择</button>
+            </div>
+            <div class="form-group">
+              <label>背面图片</label>
+              <div class="image-upload-area" id="back-upload-area">
+                <input type="file" id="back-input" accept="image/*" hidden>
+                <div class="upload-placeholder">
+                  <span class="upload-icon">📷</span>
+                  <span>点击上传背面图片</span>
+                </div>
+                <div class="image-preview hidden">
+                  <img id="back-preview" src="" alt="背面预览">
+                  <button type="button" class="remove-btn" data-target="back">×</button>
+                </div>
+              </div>
+              <button type="button" class="btn btn-small" id="select-back-btn">从已有图片选择</button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="send-date">寄出日期 *</label>
+              <input type="date" id="send-date" required>
+            </div>
+            <div class="form-group">
+              <label for="receive-date">寄达日期</label>
+              <input type="date" id="receive-date">
+            </div>
+            <div class="form-group">
+              <label>旅行天数</label>
+              <input type="text" id="travel-days" readonly placeholder="自动计算">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="postcard-code">明信片编码</label>
+              <input type="text" id="postcard-code" placeholder="自动识别平台类型">
+              <span id="platform-hint" class="platform-hint"></span>
+            </div>
+            <div class="form-group">
+              <label>平台类型</label>
+              <input type="text" id="platform-type" readonly placeholder="自动识别">
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="description">描述（自然语言描述，系统自动解析）</label>
+            <textarea id="description" rows="3" placeholder="例如：这是一张来自东京的明信片，贴了樱花邮票，寄出日期2024年1月1日"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="submit-btn">添加明信片</button>
+            <button type="button" class="btn btn-secondary hidden" id="cancel-btn">取消编辑</button>
+          </div>
+        </form>
+
+        <div class="postcard-list">
+          <h3>明信片列表</h3>
+          <div id="manage-list" class="manage-grid"></div>
+        </div>
+      </section>
+
+      <section id="rules-page" class="page">
+        <div class="rules-header">
+          <h2>编码-平台规则配置</h2>
+          <button class="btn btn-primary" id="add-rule-btn">添加规则</button>
+        </div>
+        <div class="rules-list" id="rules-list"></div>
+        <div id="rule-form-modal" class="modal hidden">
+          <div class="modal-content">
+            <h3 id="rule-modal-title">添加规则</h3>
+            <form id="rule-form">
+              <input type="hidden" id="rule-edit-id">
+              <div class="form-group">
+                <label for="rule-name">规则名称 *</label>
+                <input type="text" id="rule-name" required placeholder="例如：Postcards小邮局">
+              </div>
+              <div class="form-group">
+                <label for="rule-pattern">正则表达式 *</label>
+                <input type="text" id="rule-pattern" required placeholder="例如：^PC\d{8}$">
+              </div>
+              <div class="form-group">
+                <label for="rule-platform">平台类型 *</label>
+                <input type="text" id="rule-platform" required placeholder="例如：postcards">
+              </div>
+              <div class="form-group">
+                <label for="rule-priority">优先级</label>
+                <input type="number" id="rule-priority" value="0" placeholder="数字越大优先级越高">
+              </div>
+              <div class="form-group">
+                <label for="rule-description">描述</label>
+                <input type="text" id="rule-description" placeholder="规则描述">
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">保存</button>
+                <button type="button" class="btn btn-secondary" id="rule-cancel-btn">取消</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="postcard-modal" class="modal hidden">
+      <div class="modal-content postcard-detail">
+        <button class="modal-close">×</button>
+        <div class="detail-grid">
+          <div class="detail-images">
+            <div class="detail-image-box">
+              <img id="detail-front" src="" alt="正面">
+              <span class="image-label">正面</span>
+            </div>
+            <div class="detail-image-box">
+              <img id="detail-back" src="" alt="背面">
+              <span class="image-label">背面</span>
+            </div>
+          </div>
+          <div class="detail-info">
+            <p><strong>编码：</strong><span id="detail-code">-</span></p>
+            <p><strong>平台：</strong><span id="detail-platform">-</span></p>
+            <p><strong>寄出日期：</strong><span id="detail-send-date">-</span></p>
+            <p><strong>寄达日期：</strong><span id="detail-receive-date">-</span></p>
+            <p><strong>旅行天数：</strong><span id="detail-travel-days">-</span></p>
+            <p><strong>描述：</strong><span id="detail-description">-</span></p>
+            <p><strong>添加时间：</strong><span id="detail-created">-</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="image-select-modal" class="modal hidden">
+      <div class="modal-content image-selector">
+        <h3>选择已有图片</h3>
+        <div class="image-selector-grid" id="image-selector-grid"></div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="close-image-select">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/scripts/api.js"></script>
+  <script src="/scripts/app.js"></script>
+</body>
+</html>
